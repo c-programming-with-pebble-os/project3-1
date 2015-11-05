@@ -3,15 +3,18 @@
     "capabilities": [
         ""
     ],
-    "companyName": "jipping+c@hope.edu",
-    "longName": "Project 3.2",
+    "companyName": "C Programming With Pebble OS",
+    "longName": "Project 3.1",
     "projectType": "native",
     "resources": {
         "media": []
     },
     "sdkVersion": "3",
-    "shortName": "Project 3.2",
-    "uuid": "5bf6a682-7b8d-40ac-977e-feb001e4a4fb",
+    "shortName": "Project 3.1",
+    "targetPlatforms": [
+        "basalt"
+    ],
+    "uuid": "5501fa50-4196-4313-84ff-d0b9f4800347",
     "versionLabel": "1.0",
     "watchapp": {
         "watchface": false

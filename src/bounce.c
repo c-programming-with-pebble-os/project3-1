@@ -1,59 +1,56 @@
 #include <pebble.h>
-#include <pebble.h>
 
-#define ACCEL_STEP_MS 25
+#define ACCEL_STEP_MS 50
 
 static Window *window;
 static Layer *bouncy_layer;
 static GRect window_frame;
+
 static int position_x, position_y;
 static int x_velocity, y_velocity;
-static int acceleration;
-static int center_point_x, center_point_y;
-static int angle, radius;
-static char letter;
-static int direction=1;
-static int size=0;
+const int ball_radius = 10;
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-    direction = direction * -1;
-}
+    position_x = 72;
+    position_y = 25;
+    x_velocity = y_velocity = 3;
+} 
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
-  size++;
+
 }
 
 static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
   
 }
 
-static void move_letter() {
-    angle = (angle + 1) % 360;
-    int dangle = TRIG_MAX_ANGLE * angle / 360;
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "%d", angle/360);
-    position_x = center_point_x + (radius*direction*sin_lookup(dangle)/TRIG_MAX_RATIO);
-    position_y = center_point_y + (radius*cos_lookup(dangle)/TRIG_MAX_RATIO);
-    if (angle == 0) letter = letter + 1;
+static void bounce_the_ball() {
+    if ((position_x - ball_radius < 0)
+        || (position_x + ball_radius > window_frame.size.w)) {
+        x_velocity = x_velocity * -1;
+    }
+    if ((position_y - ball_radius < 0)
+        || (position_y + ball_radius > window_frame.size.h)) {
+        y_velocity = y_velocity * -1;
+    }
+    position_y = position_y + y_velocity;
 }
     
 
 static void bouncy_layer_update_callback(Layer *me, GContext *ctx) { 
+    if (position_x == -1) return;
+    
 #ifdef PBL_COLOR
-  graphics_context_set_text_color(ctx, GColorCobaltBlue);
+  graphics_context_set_fill_color(ctx, GColorCobaltBlue);
 #else
-  graphics_context_set_text_color(ctx, GColorBlack);
+  graphics_context_set_fill_color(ctx, GColorWhite);
 #endif
-  char text[2];
-  text[0] = letter;
-  text[1] = 0;
-  graphics_draw_text(ctx, text, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD), 
-                     GRect(position_x,position_y,30,30), 
-                     GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
+  graphics_fill_circle(ctx, GPoint(position_x, position_y), ball_radius);
 }
 
 static void timer_callback(void *data) {
 
-    move_letter();    
+    bounce_the_ball();    
     layer_mark_dirty(bouncy_layer);
     app_timer_register(ACCEL_STEP_MS, timer_callback, NULL);
 }
@@ -86,15 +83,10 @@ static void init(void) {
   });
   const bool animated = true;
   window_stack_push(window, animated);
-        
-    x_velocity = y_velocity = 3;
-    center_point_x = 84;
-    center_point_y = 72;
-    radius = 40;
-    angle = 0;
-    letter = 'A';
-
-    app_timer_register(ACCEL_STEP_MS, timer_callback, NULL);
+    
+   position_x = position_y = -1;
+    
+  app_timer_register(ACCEL_STEP_MS, timer_callback, NULL);
 }
 
 static void deinit(void) {
